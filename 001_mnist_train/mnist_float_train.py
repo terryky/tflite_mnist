@@ -52,8 +52,11 @@ with tf.Session() as sess:
     # test-set で学習済みモデルを検証
     correct_prediction = tf.equal(tf.argmax(y, 1), y_)
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    print(sess.run(accuracy,
+
+    print('===================================================')
+    print('Accuracy(float): %f' % sess.run(accuracy,
                    feed_dict={x: mnist.test.images, y_: mnist.test.labels}))
+    print('===================================================')
 
 
     # ----------------------------------
