@@ -10,3 +10,7 @@ set -x
 ./run_export.sh -q
 ./run_convert_to_tflite.sh -q
 
+
+#./run_posttrain_quant.sh
+
+
