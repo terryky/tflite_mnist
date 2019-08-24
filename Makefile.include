@@ -7,7 +7,8 @@ CXXFLAGS += -std=c++11
 INCLUDES += -I$(TENSORFLOW_DIR)
 INCLUDES += -I$(TFLITE_BASE_DIR)/tools/make/downloads/flatbuffers/include
 
-LDFLAGS  += -L$(TFLITELIB_DIR)
+LDFLAGS  += -Wl,--allow-multiple-definition
+LDFLAGS  += -L$(TFLITE_LIB_DIR)
 LIBS     += -pthread -ltensorflow-lite -ldl
 
 OBJS     += $(patsubst %.cc,%.o,$(patsubst %.cpp,%.o,$(patsubst %.c,%.o,$(SRCS))))
