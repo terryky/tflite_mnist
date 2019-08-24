@@ -11,6 +11,6 @@ set -x
 ./run_convert_to_tflite.sh -q
 
 
-#./run_posttrain_quant.sh
+./run_posttrain_quant.sh
 
 
