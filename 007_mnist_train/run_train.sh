@@ -5,7 +5,7 @@ set -x
 #tensorboard --logdir log_data&
 
 # nVidia環境で、GPU 無効化して実行したい場合は下の１行を有効にする
-export CUDA_VISIBLE_DEVICES=
+#export CUDA_VISIBLE_DEVICES=
 
 # floatでトレーニングするか、quantでトレーニングするか
 FLAG_QUANT=false

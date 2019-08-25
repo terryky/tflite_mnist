@@ -14,8 +14,6 @@ if tf.__version__ < "1.14.0":
     print ("This script doesn't support TensorFlow %s." % tf.__version__)
     sys.exit()
 
-
-
 graph_def_file = "graph_def_export/frozen.pb"
 input_arrays   = ["Placeholder"]
 output_arrays  = ["softmax/Softmax"]

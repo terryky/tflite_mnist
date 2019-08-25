@@ -2,11 +2,19 @@
 # Post Training Quantize
 #  https://www.tensorflow.org/lite/performance/post_training_quantization
 # ------------------------------------------------------
+import sys
 import tensorflow as tf
 import tensorflow.lite as lite
 from tensorflow.examples.tutorials.mnist import input_data
 
-graph_def_file = "graph_def/frozen.pb"
+
+# TensorFlow 1.14 以降じゃないと
+# "AttributeError: module 'tensorflow._api.v1.lite' has no attribute 'Optimize'" エラー
+if tf.__version__ < "1.14.0":
+    print ("This script doesn't support TensorFlow %s." % tf.__version__)
+    sys.exit()
+
+graph_def_file = "graph_def_export/frozen.pb"
 input_arrays   = ["Placeholder"]
 output_arrays  = ["add"]
 tflite_file    = "mnist_frozengraph_posttrain_quant.tflite"

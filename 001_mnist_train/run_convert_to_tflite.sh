@@ -14,6 +14,10 @@ do
 done
 
 
+BASE_DIR=./
+#BASE_DIR=./1.12/
+
+
 # =================
 #   QUANT
 # =================
@@ -22,10 +26,10 @@ if $FLAG_QUANT ; then
   # --------------------------------------------------------
   # freeze_graph
   # --------------------------------------------------------
-  PB_FILE=./graph_def_quant_export/model_graph.pb
-  CKPT_FILE=./checkpoint_quant/mymodel
+  PB_FILE=${BASE_DIR}/graph_def_quant_export/model_graph.pb
+  CKPT_FILE=${BASE_DIR}/checkpoint_quant/mymodel
   OUTNODE_NAME=act_quant/FakeQuantWithMinMaxVars
-  FROZEN_PB_FILE=./graph_def_quant_export/frozen.pb
+  FROZEN_PB_FILE=${BASE_DIR}/graph_def_quant_export/frozen.pb
 
   ../convert_script/freeze_pb_graph.sh ${PB_FILE} ${CKPT_FILE} ${OUTNODE_NAME} ${FROZEN_PB_FILE}
 
@@ -37,13 +41,13 @@ if $FLAG_QUANT ; then
   INNODE_SHAPE=1,784
 
   ../convert_script/convert_pb_to_tflite_quant.sh ${FROZEN_PB_FILE} ${INNODE_NAME} ${OUTNODE_NAME} ${INNODE_SHAPE}
-  mv graph_def_quant_export/frozen.pb.tf_quant.tflite ./mnist_frozengraph_quant.tflite
+  mv ${BASE_DIR}/graph_def_quant_export/frozen.pb.tf_quant.tflite ${BASE_DIR}/mnist_frozengraph_quant.tflite
 
 
   # --------------------------------------------------------
   # TFLiteに変換 (Saved Model)
   # --------------------------------------------------------
-  SAVEDMODEL_DIR=./saved_model_quant
+  SAVEDMODEL_DIR=${BASE_DIR}/saved_model_quant
   INNODE_NAME=Placeholder
   INNODE_SHAPE=1,784
 
@@ -59,10 +63,10 @@ else
   # --------------------------------------------------------
   # freeze_graph
   # --------------------------------------------------------
-  PB_FILE=./graph_def/model_graph.pb
-  CKPT_FILE=./checkpoint/mymodel
+  PB_FILE=${BASE_DIR}/graph_def_export/model_graph.pb
+  CKPT_FILE=${BASE_DIR}/checkpoint/mymodel
   OUTNODE_NAME=add
-  FROZEN_PB_FILE=./graph_def/frozen.pb
+  FROZEN_PB_FILE=${BASE_DIR}/graph_def_export/frozen.pb
 
   ../convert_script/freeze_pb_graph.sh ${PB_FILE} ${CKPT_FILE} ${OUTNODE_NAME} ${FROZEN_PB_FILE}
 
@@ -74,18 +78,16 @@ else
   INNODE_SHAPE=1,784
 
   ../convert_script/convert_pb_to_tflite_float.sh ${FROZEN_PB_FILE} ${INNODE_NAME} ${OUTNODE_NAME} ${INNODE_SHAPE}
-  mv graph_def/frozen.pb.tf_float.tflite ./mnist_frozengraph_float.tflite
+  mv ${BASE_DIR}/graph_def_export/frozen.pb.tf_float.tflite ${BASE_DIR}/mnist_frozengraph_float.tflite
 
 
   # --------------------------------------------------------
   # TFLiteに変換 (Saved Model)
   # --------------------------------------------------------
-  SAVEDMODEL_DIR=./saved_model
-  INNODE_NAME=Placeholder
-  INNODE_SHAPE=1,784
+  SAVEDMODEL_DIR=${BASE_DIR}/saved_model
 
   ../convert_script/convert_savedmodel_to_tflite_float.sh ${SAVEDMODEL_DIR} ${INNODE_NAME} ${OUTNODE_NAME} ${INNODE_SHAPE}
-  mv ./saved_model.tf_float.tflite ./mnist_savedmodel_float.tflite
+  mv saved_model.tf_float.tflite ${BASE_DIR}/mnist_savedmodel_float.tflite
 
 fi
 

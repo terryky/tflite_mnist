@@ -4,7 +4,10 @@ set -x
 
 #tensorboard --logdir log_data&
 
-# float�Ńg���[�j���O���邩�Aquant�Ńg���[�j���O���邩
+# nVidia環境で、GPU 無効化して実行したい場合は下の１行を有効にする
+#export CUDA_VISIBLE_DEVICES=
+
+# floatでトレーニングするか、quantでトレーニングするか
 FLAG_QUANT=false
 
 while getopts qf OPT
