@@ -194,6 +194,8 @@ infer_uint8 (tflite::Interpreter *interpreter)
         fprintf (stderr, "result: %d\n", result);
         fprintf (stderr, "label : %d\n", label);
 #endif
+        if (idx % 1000 == 0)
+            fprintf (stderr, "%d\n", idx);
     }
 
     uint64_t proc_us = get_time_us () - begin_time;
@@ -211,6 +213,6 @@ infer_uint8 (tflite::Interpreter *interpreter)
 
     return 0;
 }
-    
-    
-    
+
+
+
