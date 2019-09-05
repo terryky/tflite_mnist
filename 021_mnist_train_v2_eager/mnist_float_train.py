@@ -5,10 +5,6 @@
 import tensorflow as tf
 import numpy as np
 
-from tensorflow.keras.layers import Dense, Flatten, Conv2D
-from tensorflow.keras import Model
-
-
 # -------------------------------------------------------
 #  入力データ (MNIST)
 #    ~/.keras/datasets/mnist.npz にダウンロードされる。
@@ -21,11 +17,6 @@ mnist = tf.keras.datasets.mnist
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 x_train = x_train / 255.0
 x_test  = x_test  / 255.0
-
-# 次元を増やす 
-# [NWH] (60000, 28, 28) ==> [NWHC] (60000, 28, 28, 1)
-x_train = x_train[..., tf.newaxis]
-x_test  = x_test [..., tf.newaxis]
 
 # デフォルトの fp64 だと tflite_converter がエラーになるので fp32 にする
 x_train = x_train.astype(np.float32)
@@ -40,6 +31,7 @@ test_ds  = tf.data.Dataset.from_tensor_slices((x_test,  y_test )).batch(32)
 #  モデル構築 [シンボリック(宣言型)スタイル]
 # -------------------------------------------------------
 model_symbolic = tf.keras.Sequential([
+    tf.keras.layers.InputLayer(input_shape=(1, 28, 28, 1)),
     tf.keras.layers.Flatten(),
     tf.keras.layers.Dense( 10, activation='softmax')
 ])
@@ -48,13 +40,15 @@ model_symbolic = tf.keras.Sequential([
 # -------------------------------------------------------
 #  モデル構築 [モデルサブクラス(命令型)スタイル]
 # -------------------------------------------------------
-class MyModel(Model):
+class MyModel (tf.keras.Model):
     def __init__(self):
         super(MyModel, self).__init__()
-        self.flatten = Flatten()
-        self.d1 = Dense(10, activation='softmax')
+        self.inlayer = tf.keras.layers.InputLayer(input_shape=(1, 28, 28, 1))
+        self.flatten = tf.keras.layers.Flatten()
+        self.d1      = tf.keras.layers.Dense(10, activation='softmax')
 
     def call(self, x):
+        x = self.inlayer(x)
         x = self.flatten(x)
         x = self.d1(x)
 
@@ -152,6 +146,17 @@ for epoch in range(EPOCHS):
 # グラフモデル、重みの保存
 # ----------------------------------
 
+
+#
+# train_step 関数を @tf.function デコレータ無しで呼び出した場合
+# save() 時に下記エラーとなる。
+#   + cannot be saved because the input shapes have not been set
+# これを回避するために、model._set_inputs() で設定しておく。
+#
+# 逆に、 train_step 関数を @tf.function デコレータ有で呼び出した場合
+# 下記２行はコメントアウトしておかないと、今度は下記エラーとなる
+#   + Model inputs are already set.
+#
 dummy_x = np.zeros((1, 28, 28, 1))
 model._set_inputs(dummy_x)
 
@@ -167,4 +172,28 @@ if (model == model_symbolic):
 # SavedModel 形式
 
 model.save('./saved_model', save_format='tf')
+
+
+#-------------------------------------------------------
+#
+#
+# +---------------+----------------+-----------------+----------+----------+
+# |モデルスタイル |@tf.function有無|_set_inputs()有無| HDF5形式 | SavedModel
+# +---------------+----------------+-----------------+----------+----------+
+# |model_symbolic | なし           | あり            | OK       | OK       |
+# |               | なし           | なし            | OK       | [Err2]   |
+# |               | あり           | あり            | [Err3]   | [Err3]   |
+# |               | あり           | なし            | OK       | OK       |
+# +---------------+----------------+-----------------+----------+----------+
+# |model_subclass | なし           | あり            | [Err1]   | OK       |
+# |               | なし           | なし            | [Err1]   | [Err2]   |
+# |               | あり           | あり            | [Err1]   | [Err3]   |
+# |               | あり           | なし            | [Err1]   | OK       |
+# +---------------+----------------+-----------------+----------+----------+
+#
+# [Err1] Saving the model to HDF5 format requires the model to be a Functional model or a Sequential model. 
+# [Err2] cannot be saved because the input shapes have not been set.
+# [Err3] Model inputs are already set.
+
+
 
